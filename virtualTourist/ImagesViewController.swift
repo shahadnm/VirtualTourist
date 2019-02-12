@@ -12,10 +12,11 @@ import Kingfisher
 import CoreData
 
 class ImagesViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-
+    
     var annotation = MKPointAnnotation()
     var pin: Pin!
     @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var mapView: MKMapView!
     var appDelegate: AppDelegate!
     var dataController:DataController!
@@ -29,14 +30,14 @@ class ImagesViewController: UIViewController, MKMapViewDelegate, UICollectionVie
         fetchRequest.predicate = predicate
         let sortDescriptor = NSSortDescriptor(key: "createdDate", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
-        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: dataController.viewContext, sectionNameKeyPath: nil, cacheName: "\(annotation)-notes")
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: dataController.viewContext, sectionNameKeyPath: nil, cacheName: nil )
         fetchedResultsController.delegate = self
         
         do {
             try fetchedResultsController.performFetch()
             
             if fetchedResultsController.fetchedObjects?.count == 0 {
-              addPic()
+                addPic()
             }
         } catch {
             fatalError("The fetch could not be performed: \(error.localizedDescription)")
@@ -45,9 +46,9 @@ class ImagesViewController: UIViewController, MKMapViewDelegate, UICollectionVie
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         appDelegate = UIApplication.shared.delegate as! AppDelegate
-
+        
         let region = MKCoordinateRegion(center: self.annotation.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
         self.mapView.setRegion(region, animated: true)
         
@@ -55,11 +56,11 @@ class ImagesViewController: UIViewController, MKMapViewDelegate, UICollectionVie
         annotations.append(self.annotation)
         self.mapView.removeAnnotations(self.mapView.annotations)
         self.mapView.addAnnotations(annotations)
-        
+        self.activityIndicator.startAnimating()
         setupFetchedResultsController()
         
     }
-
+    
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         fetchedResultsController = nil
@@ -68,32 +69,42 @@ class ImagesViewController: UIViewController, MKMapViewDelegate, UICollectionVie
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
     }
-   
+    
     func addPic() {
         
         DispatchQueue.main.async {
             for index in 0 ..< Pictures.pics.count  {
-  
-            let imageUrlString = Pictures.pics[index]
-            
-            let picture = Picture(context: self.dataController.viewContext)
-            picture.url = imageUrlString
-            picture.createdDate = Date()
-            picture.pin = self.pin
-
+                
+                let imageUrlString = Pictures.pics[index]
+                
+                let picture = Picture(context: self.dataController.viewContext)
+                picture.url = imageUrlString
+                picture.createdDate = Date()
+                picture.pin = self.pin
+                
+                
+                
+                let url = URL(string: imageUrlString)
+                let data = try? Data(contentsOf: url!)
+                let image = UIImage(data: data!)
+                let imageToData = image!.pngData() as Data?
+                picture.imageData = imageToData
+                
             }
-  try? self.dataController.viewContext.save()
+            try? self.dataController.viewContext.save()
+            self.activityIndicator.stopAnimating()
         }
     }
     
     @IBAction func newCollectionClicked(_ sender: Any) {
+        self.activityIndicator.startAnimating()
         APIRequests.getImages(annotation: self.annotation){ (msg) in
             
             if msg == nil {
                 DispatchQueue.main.async {
-             self.deleteAll()
-             self.addPic()
-             self.collectionView.reloadData()
+                    self.deleteAll()
+                    self.addPic()
+                    self.collectionView.reloadData()
                 }
             }
             else {
@@ -107,7 +118,7 @@ class ImagesViewController: UIViewController, MKMapViewDelegate, UICollectionVie
     }
     
     func deleteAll(){
-
+        
         let fetchRequest:NSFetchRequest<Picture> = Picture.fetchRequest()
         fetchRequest.includesPropertyValues = false
         do {
@@ -117,7 +128,7 @@ class ImagesViewController: UIViewController, MKMapViewDelegate, UICollectionVie
             }
             try self.dataController.viewContext.save()
         } catch {
-            print("error")
+            debugPrint("error")
         }
     }
     
@@ -141,17 +152,18 @@ class ImagesViewController: UIViewController, MKMapViewDelegate, UICollectionVie
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-             
-       let aPicture = fetchedResultsController.object(at: indexPath)
+        
+        let aPicture = fetchedResultsController.object(at: indexPath)
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CustomeCollectionViewCell", for: indexPath) as! CustomeCollectionViewCell
+        
         let imageUrlString = aPicture.url
         cell.image.kf.indicatorType = .activity
         let url = URL(string: imageUrlString!)
         cell.image.kf.setImage(with: url)
-            
+        
         return cell
     }
-
+    
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         
         let reuseId = "pin"
@@ -190,13 +202,13 @@ class ImagesViewController: UIViewController, MKMapViewDelegate, UICollectionVie
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return fetchedResultsController.sections?.count ?? 0
     }
-
+    
 }
 
 extension ImagesViewController:NSFetchedResultsControllerDelegate {
     
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-       
-           collectionView.reloadData()
+        
+        collectionView.reloadData()
     }
 }

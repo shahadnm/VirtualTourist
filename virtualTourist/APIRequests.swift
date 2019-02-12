@@ -11,7 +11,7 @@ import UIKit
 import MapKit
 
 class APIRequests {
-
+    
     static func getImages(annotation: MKPointAnnotation, completion: @escaping (String?)-> Void){
         
         let methodParameters = [
@@ -59,7 +59,7 @@ class APIRequests {
             
             completion(nil)
         }
-
+        
         task.resume()
     }
     
