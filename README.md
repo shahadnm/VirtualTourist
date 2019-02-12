@@ -4,9 +4,12 @@ This application will allow the user to add a pin anywhere on the map, then by c
 
 Screenshots:
 
-![First screen in app](https://www.photobox.co.uk/my/photo/full?photo_id=501659720328)
-![Long click to add a pin](https://imgur.com/a/GUl8Jip)
-![Second page to show images](https://imgur.com/a/9KSY8w0)
+First screen in app:
+![First screen in app](https://cdn1.imggmi.com/uploads/2019/2/12/1c5c605de4b044039a99b3a38b4c18be-full.png)
+Long click to add a pin:
+![Long click to add a pin](https://cdn1.imggmi.com/uploads/2019/2/12/627e97b4ded53f61abed964d76712dff-full.png)
+Second page to show images:
+![Second page to show images](https://cdn1.imggmi.com/uploads/2019/2/12/fabe53237a16799cc550285b76a071d2-full.png)
 
 Libraries:
 
