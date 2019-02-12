@@ -4,11 +4,11 @@ This application will allow the user to add a pin anywhere on the map, then by c
 
 Screenshots:
 
-First screen in app:
+
 ![First screen in app](https://cdn1.imggmi.com/uploads/2019/2/12/1c5c605de4b044039a99b3a38b4c18be-full.png)
-Long click to add a pin:
+
 ![Long click to add a pin](https://cdn1.imggmi.com/uploads/2019/2/12/627e97b4ded53f61abed964d76712dff-full.png)
-Second page to show images:
+
 ![Second page to show images](https://cdn1.imggmi.com/uploads/2019/2/12/fabe53237a16799cc550285b76a071d2-full.png)
 
 Libraries:
